@@ -23,9 +23,8 @@ async function getJS() {
       });
 
       response.on('end', () => {
-        const reg = /\['jsjiami.com.v4'\](.*?)\('jsjiami.com.v4'\);/s;
-        const match = data.match(reg);
-
+        const reg = /'\)\;\}\)\;(.*)/gs;
+        const match = reg.exec(data);
         if (match) {
           const extractedContent = match[1].trim();
           resolve(extractedContent);
@@ -43,20 +42,26 @@ async function decipher() {
   try {
     const inputString = await getJS();
     const match = inputString.match(/ull,"(.*?)"\[/);
-
+    const match1 = inputString.match(/\\u[\da-fA-F]{4}/g);
     if (match && match.length > 1) {
       const extractedString = match[1];
       const plain_text = String.fromCharCode.apply(null, extractedString.split(/[a-zA-Z]{1,}/));
-
-      const nonAsciiDict = extractNonAsciiToDict(plain_text);
-      console.log(nonAsciiDict);
-      return nonAsciiDict;
+      return process(plain_text);
+    } else if (match1 && match1.length > 1) {
+        const plain_text = match1.map(unicode => String.fromCharCode(parseInt(unicode.slice(2), 16))).filter(char => char.charCodeAt(0) > 127);
+        return process(plain_text);
     } else {
       throw new Error('未找到匹配的字符串');
     }
   } catch (error) {
     throw error;
   }
+
+    function process(plain_text: any) {
+        const nonAsciiDict = extractNonAsciiToDict(plain_text);
+        console.log(nonAsciiDict);
+        return nonAsciiDict;
+    }
 }
 
 function extractNonAsciiToDict(inputStr: string) {
