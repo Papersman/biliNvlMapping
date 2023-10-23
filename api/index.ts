@@ -12,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 async function getJS() {
-  const url = 'https://w.linovelib.com/themes/zhmb/js/hm.js';
+  const url = 'https://w.linovelib.com/themes/zhmb/js/readtool.js';
 
   return new Promise<string>((resolve, reject) => {
     https.get(url, (response) => {
